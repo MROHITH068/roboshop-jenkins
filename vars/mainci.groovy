@@ -6,7 +6,7 @@ def call()
                         {
                             sh 'env'
                             sh 'find . | grep "^./" | xargs rm -rf'
-                            git branch: 'main', url: 'https://github.com/MROHITH068/frontend'
+                            git branch: env.BRANCH_NAME, url: 'https://github.com/MROHITH068/frontend'
                         }
                     if(env.cibuild == "java")
                     {
