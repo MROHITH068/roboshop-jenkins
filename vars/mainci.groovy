@@ -2,6 +2,12 @@ def call()
 {
     node('workstation')
             {
+                stage('Code Checkout')
+                        {
+                            sh 'env'
+                            sh 'find . | grep "^./" | xargs rm -rf'
+                            git branch: 'main', url: 'https://github.com/MROHITH068/frontend'
+                        }
                     if(env.cibuild == "java")
                     {
                         stage('Build'){
@@ -26,8 +32,10 @@ def call()
 
                 if(env.TAG_NAME==~".*") {
                     stage('Publish a Artifact'){
-                        echo 'Publish a Artifact'
-                        sh 'env'
+                        if(env.cibuild =='nginx')
+                        {
+                            sh 'zip -r ${component}-${TAG_NAME}.zip *'
+                        }
                         }
                     }
             }
