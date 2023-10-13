@@ -6,7 +6,13 @@ def call()
                         {
                             sh 'env'
                             sh 'find . | grep "^./" | xargs rm -rf'
-                            git branch: env.BRANCH_NAME, url: 'https://github.com/MROHITH068/frontend'
+                            if(env.TAG_NAME ==~ ".*") {
+                                env.gitbrname = "refs/tags/${env.TAG_NAME}"
+                            } else {
+                                env.gitbrname = "${env.BRANCH_NAME}"
+                            }
+                            checkout scm: [$class: 'GitSCM', userRemoteConfigs: [[url: "https://github.com/MROHITH068/${env.component}"]], branches: [[name: gitbrname]]], poll: false
+
                         }
                     if(env.cibuild == "java")
                     {
@@ -31,12 +37,14 @@ def call()
                     }
 
                 if(env.TAG_NAME==~".*") {
-                    stage('Publish a Artifact'){
-                        if(env.cibuild =='nginx')
-                        {
-                            sh 'zip -r ${component}-${TAG_NAME}.zip *'
-                        }
-                        }
+                    stage('Publish a Artifact')
+                            {
+                        sh 'rm -f Jenkinsfile'
+                        sh 'echo ${TAG_NAME} > VERSION'
+                        sh 'zip -r ${component}-${TAG_NAME}.zip *'
+                        sh 'curl -v -u admin:admin123 --upload-file ${component}-${TAG_NAME}.zip http://172.31.42.230:8081/repository/${component}/${component}-${TAG_NAME}.zip'
+
+                            }
                     }
             }
 }
